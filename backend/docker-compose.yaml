@@ -1,0 +1,19 @@
+services:
+  postgres-credit-analysis-golang-db:
+    image: postgres:16
+    container_name: postgres-credit-analysis-golang-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pwd123
+      POSTGRES_DB: CreditAnalysisGolangApp
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-credit-analysis-golang-data:/var/lib/postgresql/data
+      # Schema + seed applied automatically on first boot (empty data volume),
+      # run in alphabetical order: 0001_init.sql then 0002_seed.sql.
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  postgres-credit-analysis-golang-data:

@@ -16,6 +16,16 @@ type loginResponse struct {
 }
 
 // Login authenticates the user and returns a JWT.
+// @Summary      Autenticação
+// @Description  Autentica o usuário e retorna um token JWT.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        credentials  body      loginRequest   true  "Credenciais"
+// @Success      200          {object}  loginResponse
+// @Failure      400          {object}  map[string]string
+// @Failure      401          {object}  map[string]string
+// @Router       /auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

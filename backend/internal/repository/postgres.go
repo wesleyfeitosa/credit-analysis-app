@@ -125,6 +125,40 @@ func (p *Postgres) List(ctx context.Context, f model.ListFilter) (model.Page[mod
 	}, nil
 }
 
+func (p *Postgres) Create(ctx context.Context, a model.CreditAnalysis, events []model.CreditAnalysisEvent) (int64, error) {
+	tx, err := p.pool.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	// Rolled back if we return before Commit; a no-op once committed.
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var id int64
+	err = tx.QueryRow(ctx,
+		`INSERT INTO credit_analyses (document, client_name, status, score, created_at)
+		 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		a.Document, a.ClientName, a.Status, a.Score, a.CreatedAt,
+	).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, e := range events {
+		if _, err = tx.Exec(ctx,
+			`INSERT INTO credit_analysis_events (analysis_id, status, note, created_at)
+			 VALUES ($1, $2, $3, $4)`,
+			id, e.Status, e.Note, e.CreatedAt,
+		); err != nil {
+			return 0, err
+		}
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func (p *Postgres) GetByID(ctx context.Context, id int64) (*model.CreditAnalysisDetail, error) {
 	var d model.CreditAnalysisDetail
 	err := p.pool.QueryRow(ctx,

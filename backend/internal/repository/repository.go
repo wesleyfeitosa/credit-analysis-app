@@ -21,6 +21,9 @@ type UserRepository interface {
 type CreditAnalysisRepository interface {
 	List(ctx context.Context, f model.ListFilter) (model.Page[model.CreditAnalysis], error)
 	GetByID(ctx context.Context, id int64) (*model.CreditAnalysisDetail, error)
+	// Create persists a new analysis together with its lifecycle events in a
+	// single transaction and returns the generated analysis ID.
+	Create(ctx context.Context, a model.CreditAnalysis, events []model.CreditAnalysisEvent) (int64, error)
 }
 
 // PreferencesRepository persists per-user filter preferences.

@@ -1,0 +1,451 @@
+basePath: /
+definitions:
+  handler.createAnalysisRequest:
+    properties:
+      clientName:
+        minLength: 2
+        type: string
+      document:
+        minLength: 11
+        type: string
+    required:
+    - clientName
+    - document
+    type: object
+  handler.loginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 4
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handler.loginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  model.AnalysisStatus:
+    enum:
+    - APROVADO
+    - REPROVADO
+    - EM_ANALISE
+    - PENDENTE
+    type: string
+    x-enum-varnames:
+    - StatusApproved
+    - StatusRejected
+    - StatusInReview
+    - StatusPending
+  model.CreditAnalysis:
+    properties:
+      clientName:
+        type: string
+      createdAt:
+        type: string
+      document:
+        type: string
+      id:
+        type: integer
+      score:
+        type: integer
+      status:
+        $ref: '#/definitions/model.AnalysisStatus'
+    type: object
+  model.CreditAnalysisDetail:
+    properties:
+      clientName:
+        type: string
+      createdAt:
+        type: string
+      document:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.CreditAnalysisEvent'
+        type: array
+      id:
+        type: integer
+      score:
+        type: integer
+      status:
+        $ref: '#/definitions/model.AnalysisStatus'
+    type: object
+  model.CreditAnalysisEvent:
+    properties:
+      analysisId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      note:
+        type: string
+      status:
+        $ref: '#/definitions/model.AnalysisStatus'
+    type: object
+  model.Page-model_CreditAnalysis:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/model.CreditAnalysis'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+    type: object
+  sdui.Column:
+    properties:
+      key:
+        type: string
+      label:
+        type: string
+    type: object
+  sdui.Component:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/sdui.Column'
+        type: array
+      fields:
+        items:
+          $ref: '#/definitions/sdui.Field'
+        type: array
+      type:
+        type: string
+    type: object
+  sdui.Field:
+    properties:
+      key:
+        type: string
+      label:
+        type: string
+      options:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+    type: object
+  sdui.Screen:
+    properties:
+      components:
+        items:
+          $ref: '#/definitions/sdui.Component'
+        type: array
+      screen:
+        type: string
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API do Sistema de Análises de Crédito (autenticação, listagem e SDUI).
+  title: Credit Analysis API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica o usuário e retorna um token JWT.
+      parameters:
+      - description: Credenciais
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.loginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Autenticação
+      tags:
+      - auth
+  /credit-analyses:
+    get:
+      description: Lista análises de crédito com filtros, paginação e ordenação.
+      parameters:
+      - description: Filtra por CPF/CNPJ
+        in: query
+        name: document
+        type: string
+      - description: Filtra por nome do cliente
+        in: query
+        name: clientName
+        type: string
+      - description: Filtra por status
+        enum:
+        - APROVADO
+        - REPROVADO
+        - EM_ANALISE
+        - PENDENTE
+        in: query
+        name: status
+        type: string
+      - description: Score mínimo
+        in: query
+        name: scoreMin
+        type: integer
+      - description: Score máximo
+        in: query
+        name: scoreMax
+        type: integer
+      - description: Data inicial (RFC3339)
+        in: query
+        name: dateFrom
+        type: string
+      - description: Data final (RFC3339)
+        in: query
+        name: dateTo
+        type: string
+      - description: Página (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Itens por página (default 20)
+        in: query
+        name: pageSize
+        type: integer
+      - description: Campo de ordenação (default createdAt)
+        in: query
+        name: sortBy
+        type: string
+      - description: Direção
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sortDir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Page-model_CreditAnalysis'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Listar análises
+      tags:
+      - credit-analyses
+    post:
+      consumes:
+      - application/json
+      description: Cria uma nova análise de crédito e emula o processo de análise
+        (PENDENTE → EM_ANALISE → APROVADO/REPROVADO), retornando o resultado final
+        com o histórico de eventos.
+      parameters:
+      - description: Dados do cliente
+        in: body
+        name: analysis
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createAnalysisRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.CreditAnalysisDetail'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Criar análise
+      tags:
+      - credit-analyses
+  /credit-analyses/{id}:
+    get:
+      description: Retorna uma análise de crédito com seu histórico de eventos.
+      parameters:
+      - description: ID da análise
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CreditAnalysisDetail'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Detalhe da análise
+      tags:
+      - credit-analyses
+  /health:
+    get:
+      description: Verifica se o serviço está no ar.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /sdui/screens/credit-analyses:
+    get:
+      description: Retorna o contrato SDUI que descreve a tela de listagem de análises.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sdui.Screen'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: SDUI da tela de listagem
+      tags:
+      - sdui
+  /sdui/screens/login:
+    get:
+      description: Retorna o contrato SDUI que descreve a tela de login.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sdui.Screen'
+      summary: SDUI da tela de login
+      tags:
+      - sdui
+  /users/preferences/filters:
+    post:
+      consumes:
+      - application/json
+      description: Salva as preferências de filtros do usuário autenticado (JSON arbitrário).
+      parameters:
+      - description: Estado dos filtros
+        in: body
+        name: filters
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Salvar preferências de filtros
+      tags:
+      - preferences
+securityDefinitions:
+  BearerAuth:
+    description: 'Informe o token como: "Bearer <token>"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

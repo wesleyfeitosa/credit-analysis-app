@@ -18,6 +18,7 @@ func (h *Handler) Register(r *gin.Engine, jwtSecret string) {
 	{
 		protected.GET("/sdui/screens/credit-analyses", h.CreditAnalysesScreen)
 		protected.GET("/credit-analyses", h.ListAnalyses)
+		protected.POST("/credit-analyses", h.CreateAnalysis)
 		protected.GET("/credit-analyses/:id", h.GetAnalysis)
 		protected.POST("/users/preferences/filters", h.SaveFilterPreferences)
 	}

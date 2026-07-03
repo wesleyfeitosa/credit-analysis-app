@@ -13,6 +13,18 @@ import (
 
 // SaveFilterPreferences stores the authenticated user's filter preferences.
 // The body is an arbitrary JSON object describing the filter state.
+// @Summary      Salvar preferências de filtros
+// @Description  Salva as preferências de filtros do usuário autenticado (JSON arbitrário).
+// @Tags         preferences
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        filters  body      object  true  "Estado dos filtros"
+// @Success      204      "No Content"
+// @Failure      400      {object}  map[string]string
+// @Failure      401      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /users/preferences/filters [post]
 func (h *Handler) SaveFilterPreferences(c *gin.Context) {
 	userID := c.GetInt64(middleware.ContextUserID)
 
