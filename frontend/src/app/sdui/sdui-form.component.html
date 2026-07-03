@@ -1,0 +1,76 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="sdui-form" [class.sdui-form--filter]="isFilter">
+  <div class="sdui-form__fields">
+    @for (field of fields; track field.key) {
+      @switch (field.type) {
+        <!-- select -->
+        @case ('select') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            <mat-select [formControlName]="field.key">
+              @if (isFilter) {
+                <mat-option [value]="''">Todos</mat-option>
+              }
+              @for (opt of field.options; track opt) {
+                <mat-option [value]="opt">{{ opt }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <!-- dateRange -->
+        @case ('dateRange') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }} (de)</mat-label>
+            <input matInput [matDatepicker]="pickerFrom" [formControlName]="field.key + 'From'" />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }} (até)</mat-label>
+            <input matInput [matDatepicker]="pickerTo" [formControlName]="field.key + 'To'" />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+        }
+
+        <!-- numberRange -->
+        @case ('numberRange') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }} (mín)</mat-label>
+            <input matInput type="number" [formControlName]="field.key + 'Min'" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }} (máx)</mat-label>
+            <input matInput type="number" [formControlName]="field.key + 'Max'" />
+          </mat-form-field>
+        }
+
+        <!-- text / password (default) -->
+        @default {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            <input
+              matInput
+              [type]="field.type === 'password' ? 'password' : 'text'"
+              [formControlName]="field.key"
+            />
+            @if (form.get(field.key)?.hasError('required') && form.get(field.key)?.touched) {
+              <mat-error>{{ field.label }} é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        }
+      }
+    }
+  </div>
+
+  <div class="sdui-form__actions">
+    <button mat-flat-button color="primary" type="submit" [disabled]="loading">
+      {{ submitLabel }}
+    </button>
+    @if (isFilter) {
+      <button mat-stroked-button type="button" (click)="reset()" [disabled]="loading">
+        Limpar
+      </button>
+    }
+  </div>
+</form>

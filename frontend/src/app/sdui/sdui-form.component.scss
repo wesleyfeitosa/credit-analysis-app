@@ -1,0 +1,28 @@
+.sdui-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sdui-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Filter forms lay their fields out in a responsive grid. */
+.sdui-form--filter .sdui-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 4px 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.sdui-form__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}

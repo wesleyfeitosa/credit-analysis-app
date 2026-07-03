@@ -1,0 +1,46 @@
+<div class="sdui-table">
+  @if (loading) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <table mat-table [dataSource]="data" matSort (matSortChange)="sortChange.emit($event)">
+    @for (col of columns; track col.key) {
+      <ng-container [matColumnDef]="col.key">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ col.label }}</th>
+        <td mat-cell *matCellDef="let row">
+          @switch (col.key) {
+            @case ('status') {
+              <span class="status status--{{ row.status }}">{{ row.status }}</span>
+            }
+            @case ('createdAt') {
+              {{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            }
+            @default {
+              {{ row[col.key] }}
+            }
+          }
+        </td>
+      </ng-container>
+    }
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      class="sdui-table__row"
+      (click)="rowClick.emit(row)"
+    ></tr>
+  </table>
+
+  @if (!loading && data.length === 0) {
+    <p class="sdui-table__empty">Nenhuma análise encontrada.</p>
+  }
+
+  <mat-paginator
+    [length]="total"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[10, 20, 50]"
+    (page)="pageChange.emit($event)"
+  ></mat-paginator>
+</div>

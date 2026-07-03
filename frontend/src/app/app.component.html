@@ -1,0 +1,14 @@
+@if (isAuthenticated()) {
+  <mat-toolbar color="primary" class="app-toolbar">
+    <span class="app-toolbar__brand">Análises de Crédito</span>
+    <span class="app-toolbar__spacer"></span>
+    <button mat-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sair
+    </button>
+  </mat-toolbar>
+}
+
+<main class="app-content">
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,44 @@
+<div class="analyses">
+  @if (screen(); as s) {
+    <div class="analyses__header">
+      <h1>{{ s.title }}</h1>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Nova Análise
+      </button>
+    </div>
+
+    @if (filterComponent; as fc) {
+      <mat-card class="analyses__filter">
+        <app-sdui-form
+          [component]="fc"
+          submitLabel="Filtrar"
+          [loading]="loading()"
+          (submitForm)="onFilter($event)"
+        ></app-sdui-form>
+      </mat-card>
+    }
+
+    @if (error()) {
+      <p class="analyses__error">{{ error() }}</p>
+    }
+
+    @if (tableComponent; as tc) {
+      <mat-card class="analyses__table">
+        <app-sdui-table
+          [columns]="tc.columns ?? []"
+          [data]="$any(page()?.items ?? [])"
+          [total]="page()?.total ?? 0"
+          [pageIndex]="pageIndex"
+          [pageSize]="page()?.pageSize ?? 20"
+          [loading]="loading()"
+          (sortChange)="onSort($event)"
+          (pageChange)="onPage($event)"
+          (rowClick)="onRowClick($event)"
+        ></app-sdui-table>
+      </mat-card>
+    }
+  } @else {
+    <p>Carregando…</p>
+  }
+</div>

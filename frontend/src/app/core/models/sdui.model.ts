@@ -1,0 +1,30 @@
+// Mirrors the backend SDUI contract (internal/sdui). The frontend renders these
+// descriptions dynamically instead of hard-coding screen layouts.
+
+export type SduiFieldType = 'text' | 'password' | 'select' | 'dateRange' | 'numberRange';
+
+export interface SduiField {
+  key: string;
+  label: string;
+  type: SduiFieldType;
+  options?: string[];
+}
+
+export interface SduiColumn {
+  key: string;
+  label: string;
+}
+
+export type SduiComponentType = 'form' | 'filter' | 'table';
+
+export interface SduiComponent {
+  type: SduiComponentType;
+  fields?: SduiField[];
+  columns?: SduiColumn[];
+}
+
+export interface SduiScreen {
+  screen: string;
+  title: string;
+  components: SduiComponent[];
+}

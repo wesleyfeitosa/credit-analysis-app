@@ -1,0 +1,47 @@
+<div class="detail">
+  <button mat-stroked-button (click)="back()" class="detail__back">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar
+  </button>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  } @else if (error()) {
+    <p class="detail__error">{{ error() }}</p>
+  } @else {
+    @if (detail(); as d) {
+    <mat-card class="detail__card">
+      <div class="detail__head">
+        <h1>{{ d.clientName }}</h1>
+        <span class="status status--{{ d.status }}">{{ d.status }}</span>
+      </div>
+
+      <div class="detail__grid">
+        <div><span class="detail__label">CPF/CNPJ</span>{{ d.document }}</div>
+        <div><span class="detail__label">Score</span>{{ d.score }}</div>
+        <div><span class="detail__label">Data</span>{{ d.createdAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+        <div><span class="detail__label">ID</span>{{ d.id }}</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="detail__card">
+      <h2>Histórico de Eventos</h2>
+      @if (d.events.length === 0) {
+        <p>Nenhum evento registrado.</p>
+      } @else {
+        <ol class="timeline">
+          @for (ev of d.events; track ev.id) {
+            <li class="timeline__item">
+              <span class="status status--{{ ev.status }}">{{ ev.status }}</span>
+              <div class="timeline__body">
+                <p class="timeline__note">{{ ev.note }}</p>
+                <p class="timeline__date">{{ ev.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      }
+    </mat-card>
+    }
+  }
+</div>

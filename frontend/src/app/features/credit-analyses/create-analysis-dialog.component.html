@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>Nova Análise de Crédito</h2>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="create-form">
+    <mat-form-field appearance="outline">
+      <mat-label>CPF/CNPJ</mat-label>
+      <input matInput formControlName="document" placeholder="123.456.789-00" />
+      @if (form.get('document')?.hasError('required') && form.get('document')?.touched) {
+        <mat-error>Informe o CPF/CNPJ</mat-error>
+      }
+      @if (form.get('document')?.hasError('minlength')) {
+        <mat-error>Documento muito curto</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nome do Cliente</mat-label>
+      <input matInput formControlName="clientName" />
+      @if (form.get('clientName')?.hasError('required') && form.get('clientName')?.touched) {
+        <mat-error>Informe o nome do cliente</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="create-form__error">{{ error() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="loading()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="loading()">
+    Analisar
+  </button>
+</mat-dialog-actions>

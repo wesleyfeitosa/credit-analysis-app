@@ -1,0 +1,26 @@
+<div class="login">
+  <mat-card class="login__card">
+    @if (screen(); as s) {
+      <h1 class="login__title">{{ s.title }}</h1>
+
+      @if (formComponent; as fc) {
+        <app-sdui-form
+          [component]="fc"
+          submitLabel="Entrar"
+          [loading]="loading()"
+          (submitForm)="onSubmit($event)"
+        ></app-sdui-form>
+      }
+
+      @if (error()) {
+        <p class="login__error">{{ error() }}</p>
+      }
+
+      <p class="login__hint">Teste: admin&#64;creditanalysis.com / senha123</p>
+    } @else if (error()) {
+      <p class="login__error">{{ error() }}</p>
+    } @else {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+  </mat-card>
+</div>

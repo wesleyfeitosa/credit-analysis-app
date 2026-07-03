@@ -1,0 +1,14 @@
+/* The prebuilt Material theme is loaded via angular.json "styles". */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f6f8;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+* {
+  box-sizing: border-box;
+}
