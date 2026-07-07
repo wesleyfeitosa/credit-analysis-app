@@ -1,11 +1,15 @@
 # Railway build/deploy configuration for the backend service.
 #
-# Deploys happen via `railway up` from this directory (see
-# .github/workflows/deploy.yml, which runs with working-directory: backend), so
-# this file sits at the upload snapshot root and `dockerfilePath` is relative to
-# it. For this to work, the service's Root Directory setting must be EMPTY
-# (not /backend) — otherwise Railway looks for a nested backend/ folder that
-# does not exist in the upload.
+# Deploys happen via `railway up` from the REPO ROOT (see
+# .github/workflows/deploy.yml). The whole repo is uploaded and the service's
+# Root Directory = /backend selects this folder as the build context, so
+# `dockerfilePath = "Dockerfile"` resolves to backend/Dockerfile.
+#
+# NOTE: Railway does NOT auto-discover a config file inside the Root Directory.
+# For this file to take effect (the healthcheck below), set the service's
+# "Railway Config File" path to /backend/railway.toml. Without that, the build
+# still works via Root Directory + Dockerfile auto-detection — you just don't
+# get the healthcheck/restart policy.
 
 [build]
 builder = "DOCKERFILE"
