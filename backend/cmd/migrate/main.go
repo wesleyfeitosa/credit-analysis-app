@@ -1,11 +1,15 @@
-// Command migrate applies the SQL migration files in the migrations directory
+// Command migrate applies the .sql files in a directory (default: migrations)
 // against the database referenced by DATABASE_URL, in filename order.
 //
-// The migrations are written to be idempotent (IF NOT EXISTS / ON CONFLICT), so
-// re-running is safe. The simple query protocol is used so that (a) multi-
-// statement .sql files run in a single Exec and (b) it works through Supabase's
-// transaction-mode pooler (port 6543), which does not support prepared
-// statements.
+// It runs SCHEMA migrations only by default — the deploy pipeline invokes it as
+// `go run ./cmd/migrate`, and schema files are idempotent (IF NOT EXISTS) so
+// re-running every push is safe. Seed data lives in ./seeds and is NOT applied
+// automatically (re-running it would duplicate rows); apply it explicitly on a
+// fresh database with `go run ./cmd/migrate -dir seeds`.
+//
+// The simple query protocol is used so that (a) multi-statement .sql files run
+// in a single Exec and (b) it works through Supabase's transaction-mode pooler
+// (port 6543), which does not support prepared statements.
 package main
 
 import (

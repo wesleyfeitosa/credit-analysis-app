@@ -14,7 +14,8 @@ internal/
   handler/               # gin HTTP handlers + route registration
   middleware/            # JWT auth middleware
   sdui/                  # Server Driven UI screen contracts
-migrations/              # 0001_init.sql (schema) + 0002_seed.sql (test data)
+migrations/              # 0001_init.sql — schema (applied on every deploy)
+seeds/                   # 0001_seed.sql — test data (fresh DB only, not deployed)
 ```
 
 Dependencies flow inward: `handler` depends on `service`, `service` depends on
@@ -45,7 +46,7 @@ Copy `.env.example` and adjust. Variables: `PORT`, `DATABASE_URL`, `JWT_SECRET`.
 
 ## Test credentials
 
-`admin@creditanalysis.com` / `senha123` (seeded by `migrations/0002_seed.sql`).
+`admin@creditanalysis.com` / `senha123` (seeded by `seeds/0001_seed.sql`).
 
 ## Run locally
 
@@ -55,13 +56,16 @@ go test ./...             # unit tests
 go build ./cmd/api        # build binary
 ```
 
-## Migrations
+## Migrations & seeds
 
-Two SQL files in `migrations/`. They run automatically when the postgres
-container starts (mounted into `/docker-entrypoint-initdb.d`). To apply
-manually against a running database:
+Schema lives in `migrations/` (idempotent — `IF NOT EXISTS`); seed/test data
+lives in `seeds/`. On `docker compose up`, both run once on first boot of an
+empty data volume. To apply against any database via the built-in runner:
 
 ```bash
-psql "$DATABASE_URL" -f migrations/0001_init.sql
-psql "$DATABASE_URL" -f migrations/0002_seed.sql
+go run ./cmd/migrate               # schema only (what the deploy runs on every push)
+go run ./cmd/migrate -dir seeds    # seed a FRESH database (re-running duplicates rows)
 ```
+
+The deploy pipeline applies **schema only** — seeds are never run automatically,
+so pushes don't accumulate duplicate test data.

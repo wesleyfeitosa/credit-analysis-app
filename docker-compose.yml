@@ -15,9 +15,12 @@ services:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # Schema + seed run automatically on first boot of an empty data volume,
-      # in alphabetical order: 0001_init.sql then 0002_seed.sql.
+      # First boot only (empty data volume): schema migrations run in order,
+      # then the seed (mounted as zz_seed.sql so it sorts last). This is a local
+      # dev convenience — production does NOT seed: the deploy runs
+      # `go run ./cmd/migrate` against ./backend/migrations (schema) only.
       - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+      - ./backend/seeds/0001_seed.sql:/docker-entrypoint-initdb.d/zz_seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d CreditAnalysisGolangApp"]
       interval: 5s
