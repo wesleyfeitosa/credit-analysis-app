@@ -16,6 +16,7 @@ import {
 } from '../../core/models/credit-analysis.model';
 import { SduiComponent, SduiScreen } from '../../core/models/sdui.model';
 import { CreditAnalysisService } from '../../core/services/credit-analysis.service';
+import { PreferencesService } from '../../core/services/preferences.service';
 import { SduiService } from '../../core/services/sdui.service';
 import { SduiFormComponent } from '../../sdui/sdui-form.component';
 import { SduiTableComponent } from '../../sdui/sdui-table.component';
@@ -38,6 +39,7 @@ import { CreateAnalysisDialogComponent } from './create-analysis-dialog.componen
 export class CreditAnalysesComponent implements OnInit {
   private readonly sdui = inject(SduiService);
   private readonly service = inject(CreditAnalysisService);
+  private readonly preferences = inject(PreferencesService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -55,6 +57,12 @@ export class CreditAnalysesComponent implements OnInit {
     this.sdui.getScreen('credit-analyses').subscribe({
       next: (screen) => {
         this.screen.set(screen);
+        // Apply any restored filter preferences to the query so the table is
+        // filtered on first load, matching the pre-filled filter form.
+        const saved = screen.components.find((c) => c.type === 'filter')?.values;
+        if (saved) {
+          this.filters = this.mapToParams(saved);
+        }
         this.load();
       },
       error: () => this.error.set('Não foi possível carregar a tela.'),
@@ -89,8 +97,8 @@ export class CreditAnalysesComponent implements OnInit {
    * names. The `createdAt` range field becomes dateFrom/dateTo; score already
    * matches scoreMin/scoreMax.
    */
-  onFilter(values: Record<string, unknown>): void {
-    const mapped: ListParams = {
+  private mapToParams(values: Record<string, unknown>): ListParams {
+    return {
       document: values['document'] as string,
       clientName: values['clientName'] as string,
       status: values['status'] as string,
@@ -99,9 +107,23 @@ export class CreditAnalysesComponent implements OnInit {
       dateFrom: values['createdAtFrom'] as string,
       dateTo: values['createdAtTo'] as string,
     };
-    this.filters = mapped;
+  }
+
+  onFilter(values: Record<string, unknown>): void {
+    this.filters = this.mapToParams(values);
     this.params.page = 1;
     this.load();
+
+    // Persist the raw filter state so it is restored on the next visit. The
+    // list still loads even if saving preferences fails.
+    this.preferences.saveFilters(values).subscribe({
+      error: () =>
+        this.snackBar.open(
+          'Não foi possível salvar as preferências de filtro.',
+          'OK',
+          { duration: 3000 },
+        ),
+    });
   }
 
   onSort(sort: Sort): void {

@@ -1,0 +1,13 @@
+# Environment / secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Go build artifacts
+*.exe
+*.out
+/backend/api
+/backend/migrate
+
+# OS / editor
+.DS_Store

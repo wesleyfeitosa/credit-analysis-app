@@ -119,6 +119,15 @@ definitions:
         type: array
       type:
         type: string
+      values:
+        description: |-
+          Values carries the user's previously saved state for this component
+          (keyed by field key), so the frontend can render it pre-filled. Only set
+          on the filter component when the user has saved preferences; omitted
+          otherwise.
+        items:
+          type: integer
+        type: array
     type: object
   sdui.Field:
     properties:

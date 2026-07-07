@@ -10,8 +10,8 @@ import (
 	ginswagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 
-	"creditanalysis/internal/config"
 	_ "creditanalysis/docs" // generated OpenAPI docs (swag init)
+	"creditanalysis/internal/config"
 	"creditanalysis/internal/handler"
 	"creditanalysis/internal/repository"
 	"creditanalysis/internal/service"

@@ -1,0 +1,67 @@
+name: Deploy
+
+# Runs only on pushes to main. Gates on tests, applies DB migrations to
+# Supabase, then deploys the backend to Railway.
+#
+# Required GitHub secrets (Settings -> Secrets and variables -> Actions):
+#   DATABASE_URL     Supabase SESSION-mode pooler URL (port 5432), used to run migrations.
+#   RAILWAY_TOKEN    Railway PROJECT token (Project Settings -> Tokens).
+#   RAILWAY_SERVICE  Name of the Railway service to deploy (e.g. "backend").
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy.yml"
+
+defaults:
+  run:
+    working-directory: backend
+
+# Never run two deploys at once; cancel an in-flight one if a newer push lands.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test ./...
+
+  migrate:
+    name: Apply migrations
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Run migrations against Supabase
+        run: go run ./cmd/migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  deploy:
+    name: Deploy to Railway
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy
+        run: railway up --service "$RAILWAY_SERVICE" --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE }}

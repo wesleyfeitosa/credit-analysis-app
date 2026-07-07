@@ -66,19 +66,22 @@ export class SduiFormComponent implements OnInit {
   ngOnInit(): void {
     const controls: Record<string, unknown> = {};
     const validators = this.isFilter ? [] : [Validators.required];
+    // Saved preferences echoed back by the backend, keyed by control key.
+    const saved = this.component.values ?? {};
 
     for (const field of this.fields) {
       switch (field.type) {
         case 'dateRange':
-          controls[`${field.key}From`] = [null];
-          controls[`${field.key}To`] = [null];
+          // Dates are stored as ISO strings; the datepicker needs Date objects.
+          controls[`${field.key}From`] = [toDate(saved[`${field.key}From`])];
+          controls[`${field.key}To`] = [toDate(saved[`${field.key}To`])];
           break;
         case 'numberRange':
-          controls[`${field.key}Min`] = [null];
-          controls[`${field.key}Max`] = [null];
+          controls[`${field.key}Min`] = [saved[`${field.key}Min`] ?? null];
+          controls[`${field.key}Max`] = [saved[`${field.key}Max`] ?? null];
           break;
         default:
-          controls[field.key] = ['', validators];
+          controls[field.key] = [saved[field.key] ?? '', validators];
       }
     }
     this.form = this.fb.group(controls);
@@ -106,4 +109,13 @@ export class SduiFormComponent implements OnInit {
     this.form.reset();
     this.submitForm.emit({});
   }
+}
+
+/** Parses a saved ISO date string into a Date, or null when absent/invalid. */
+function toDate(value: unknown): Date | null {
+  if (!value) {
+    return null;
+  }
+  const d = new Date(value as string);
+  return isNaN(d.getTime()) ? null : d;
 }

@@ -640,6 +640,13 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "values": {
+                    "description": "Values carries the user's previously saved state for this component\n(keyed by field key), so the frontend can render it pre-filled. Only set\non the filter component when the user has saved preferences; omitted\notherwise.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
