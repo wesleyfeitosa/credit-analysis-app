@@ -64,7 +64,7 @@ func CreditAnalysesScreen() Screen {
 						"APROVADO", "REPROVADO", "EM_ANALISE", "PENDENTE",
 					}},
 					{Key: "createdAt", Label: "Período", Type: "dateRange"},
-					{Key: "score", Label: "Score", Type: "numberRange"},
+					// {Key: "score", Label: "Score", Type: "numberRange"},
 				},
 			},
 			{
@@ -72,7 +72,7 @@ func CreditAnalysesScreen() Screen {
 				Columns: []Column{
 					{Key: "clientName", Label: "Cliente"},
 					{Key: "document", Label: "CPF/CNPJ"},
-					{Key: "status", Label: "Status"},
+					{Key: "status", Label: "Status da análise"},
 					{Key: "score", Label: "Score"},
 					{Key: "createdAt", Label: "Data da Análise"},
 				},
