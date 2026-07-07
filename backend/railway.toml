@@ -1,0 +1,20 @@
+# Railway build/deploy configuration for the backend service.
+#
+# Deploys happen via `railway up` from this directory (see
+# .github/workflows/deploy.yml, which runs with working-directory: backend), so
+# this file sits at the upload snapshot root and `dockerfilePath` is relative to
+# it. For this to work, the service's Root Directory setting must be EMPTY
+# (not /backend) — otherwise Railway looks for a nested backend/ folder that
+# does not exist in the upload.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# The API exposes GET /health (returns 200 {"status":"ok"}). Railway waits for
+# it to pass before routing traffic to a new deploy.
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
