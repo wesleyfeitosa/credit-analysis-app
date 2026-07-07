@@ -61,7 +61,13 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
       - name: Deploy
-        run: railway up --service "$RAILWAY_SERVICE" --detach
+        # Run from the repo root and archive backend/'s *contents* as the upload
+        # root (--path-as-root). Without this flag, railway up keeps the
+        # backend/ prefix (or archives the whole repo), so go.mod/cmd/ don't land
+        # at the archive root and the Dockerfile's `./cmd/api` is not found.
+        # The service's Root Directory setting must be EMPTY for this to work.
+        working-directory: ${{ github.workspace }}
+        run: railway up ./backend --path-as-root --service "$RAILWAY_SERVICE" --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE }}
