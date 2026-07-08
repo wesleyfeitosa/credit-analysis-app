@@ -46,7 +46,7 @@ func LoginScreen() Screen {
 func CreditAnalysesScreen(savedFilters json.RawMessage) Screen {
 	return Screen{
 		Screen: "credit-analyses",
-		Title:  "Análises de Crédito App",
+		Title:  "Análises de Crédito Dashboard",
 		Components: []Component{
 			{
 				Type: "filter",
@@ -57,7 +57,7 @@ func CreditAnalysesScreen(savedFilters json.RawMessage) Screen {
 						"APROVADO", "REPROVADO", "EM_ANALISE", "PENDENTE",
 					}},
 					{Key: "createdAt", Label: "Período", Type: "dateRange"},
-					{Key: "score", Label: "Score", Type: "numberRange"},
+					// {Key: "score", Label: "Score", Type: "numberRange"},
 				},
 				Values: savedFilters,
 			},
@@ -67,7 +67,7 @@ func CreditAnalysesScreen(savedFilters json.RawMessage) Screen {
 					{Key: "clientName", Label: "Cliente"},
 					{Key: "document", Label: "CPF/CNPJ"},
 					{Key: "status", Label: "Status da análise"},
-					{Key: "score", Label: "Score"},
+					{Key: "score", Label: "Pontuação"},
 					{Key: "createdAt", Label: "Data da Análise"},
 				},
 			},
