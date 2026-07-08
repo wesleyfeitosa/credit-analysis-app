@@ -1,11 +1,7 @@
-// Package sdui builds the Server Driven UI screen contracts returned to the
-// frontend. Changing layout here changes the rendered screens without a
-// frontend deploy.
 package sdui
 
 import "encoding/json"
 
-// Field describes a single filter/form input.
 type Field struct {
 	Key     string   `json:"key"`
 	Label   string   `json:"label"`
@@ -13,32 +9,24 @@ type Field struct {
 	Options []string `json:"options,omitempty"`
 }
 
-// Column describes a single table column.
 type Column struct {
 	Key   string `json:"key"`
 	Label string `json:"label"`
 }
 
-// Component is a renderable unit of a screen (form, filter, table, ...).
 type Component struct {
-	Type    string   `json:"type"`
-	Fields  []Field  `json:"fields,omitempty"`
-	Columns []Column `json:"columns,omitempty"`
-	// Values carries the user's previously saved state for this component
-	// (keyed by field key), so the frontend can render it pre-filled. Only set
-	// on the filter component when the user has saved preferences; omitted
-	// otherwise.
-	Values json.RawMessage `json:"values,omitempty"`
+	Type    string          `json:"type"`
+	Fields  []Field         `json:"fields,omitempty"`
+	Columns []Column        `json:"columns,omitempty"`
+	Values  json.RawMessage `json:"values,omitempty"`
 }
 
-// Screen is the full SDUI contract for one screen.
 type Screen struct {
 	Screen     string      `json:"screen"`
 	Title      string      `json:"title"`
 	Components []Component `json:"components"`
 }
 
-// LoginScreen returns the SDUI contract for the login screen.
 func LoginScreen() Screen {
 	return Screen{
 		Screen: "login",
@@ -55,10 +43,6 @@ func LoginScreen() Screen {
 	}
 }
 
-// CreditAnalysesScreen returns the SDUI contract for the listing screen,
-// describing both the filter and the table. When savedFilters is non-nil it is
-// embedded as the filter component's values so the screen renders pre-filled
-// with the user's previously saved preferences.
 func CreditAnalysesScreen(savedFilters json.RawMessage) Screen {
 	return Screen{
 		Screen: "credit-analyses",
